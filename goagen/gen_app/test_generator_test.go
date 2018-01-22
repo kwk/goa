@@ -202,7 +202,7 @@ var _ = Describe("Generate", func() {
 			// Multiple Routes
 			Ω(content).Should(ContainSubstring("ShowFooOK1("))
 			// Get returns an error media type
-			Ω(content).Should(ContainSubstring("GetFooOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.FooController, optionalResourceHeader *int, requiredResourceHeader string, payload app.CustomName) (http.ResponseWriter, error)"))
+			Ω(content).Should(ContainSubstring("GetFooOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.FooController, optionalResourceHeader *int, requiredResourceHeader string, payload app.CustomName, requestInterceptor ...func(t goatest.TInterface, req *http.Request, prms url.Values)) (http.ResponseWriter, error)"))
 		})
 
 		It("generates the route path parameters", func() {
@@ -254,7 +254,7 @@ var _ = Describe("Generate", func() {
 			content, err := ioutil.ReadFile(filepath.Join(outDir, "app", "test", "foo_testing.go"))
 			Ω(err).ShouldNot(HaveOccurred())
 
-			Ω(content).Should(ContainSubstring(", payload app.CustomName)"))
+			Ω(content).Should(ContainSubstring(", payload app.CustomName,"))
 		})
 
 		It("generates header compliant with https://github.com/golang/go/issues/13560", func() {

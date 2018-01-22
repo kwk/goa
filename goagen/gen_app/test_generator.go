@@ -364,7 +364,8 @@ func {{ $test.Name }}(t goatest.TInterface, ctx context.Context, service *goa.Se
 */}}{{ range $param := $test.Params }}, {{ $param.Name }} {{ $param.Pointer }}{{ $param.Type }}{{ end }}{{/*
 */}}{{ range $param := $test.QueryParams }}, {{ $param.Name }} {{ $param.Pointer }}{{ $param.Type }}{{ end }}{{/*
 */}}{{ range $header := $test.Headers }}, {{ $header.Name }} {{ $header.Pointer }}{{ $header.Type }}{{ end }}{{/*
-*/}}{{ if $test.Payload }}, {{ $test.Payload.Name }} {{ $test.Payload.Pointer }}{{ $test.Payload.Type }}{{ end }}){{/*
+*/}}{{ if $test.Payload }}, {{ $test.Payload.Name }} {{ $test.Payload.Pointer }}{{ $test.Payload.Type }}{{ end }}{{/*
+*/}}, requestInterceptor ...func(t goatest.TInterface, req *http.Request, prms url.Values)){{/*
 */}} (http.ResponseWriter{{ if $test.ReturnType }}, {{ $test.ReturnType.Pointer }}{{ $test.ReturnType.Type }}{{ end }}) {
 	// Setup service
 	var (
@@ -433,6 +434,12 @@ func {{ $test.Name }}(t goatest.TInterface, ctx context.Context, service *goa.Se
 {{ end }}{{ if $test.ReturnType }}		return nil, {{ if $test.ReturnsErrorMedia }}{{ $e }}{{ else }}nil{{ end }}{{ else }}return nil{{ end }}
 	}
 	{{ if $test.Payload }}{{ $test.ContextVarName }}.Payload = {{ $test.Payload.Name }}{{ end }}
+
+	// Before performing the action, check if the user wants to intercept the
+	// request.
+	if requestInterceptor != nil {
+		requestInterceptor(t, req, prms)
+	}
 
 	// Perform action
 	{{ $err }} = ctrl.{{ $test.ActionName}}({{ $test.ContextVarName }})
